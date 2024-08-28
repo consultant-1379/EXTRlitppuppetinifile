@@ -1,0 +1,94 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.ericsson.nms.litp.3pps</groupId>
+    <artifactId>EXTRlitppuppetinifile_CXP9032828</artifactId>
+    <packaging>rpm</packaging>
+    <name>[${project.parent.artifactId}] RPM module</name>
+    <description>inifile Puppet configuration module ${inifile_module_version} repackaged by Ericsson from Puppetlabs source code</description>
+    <parent>
+        <groupId>com.ericsson.nms.litp.3pps</groupId>
+        <artifactId>EXTRlitppuppetinifile</artifactId>
+        <version>2.2.3-SNAPSHOT</version>
+    </parent>
+  <properties>
+      <!-- publishes the rpm module to the ci portal -->
+      <publish_artifact>true</publish_artifact>
+      <inifile_module_version>1.4.2</inifile_module_version>
+  </properties>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.8</version>
+                <executions>
+                    <execution>
+                         <id>unpack_dependencies</id>
+                         <phase>process-resources</phase>
+                         <goals>
+                             <goal>unpack-dependencies</goal>
+                         </goals>
+                         <configuration>
+                             <excludeTransitive>false</excludeTransitive>
+                             <outputDirectory>${project.build.directory}/puppet/</outputDirectory>
+                         </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>rpm-maven-plugin</artifactId>
+                <extensions>true</extensions>
+                <inherited>true</inherited>
+                <configuration>
+                    <requires>
+                      <require>EXTRlitppuppetmodules_CXP9030419 &gt;= 1.0.1</require>
+                    </requires>
+                    <mappings>
+                        <mapping>
+                            <directory>/opt/ericsson/nms/litp/etc/puppet/modules</directory>
+                            <directoryIncluded>false</directoryIncluded>
+                            <sources>
+                                <source>
+                                    <location>target/puppet</location>
+                                </source>
+                            </sources>
+                        </mapping>
+                    </mappings>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.2.1</version>
+                <executions>
+                    <execution>
+                        <id>rename inifile directory</id>
+                        <phase>prepare-package</phase>
+                            <goals>
+                                <goal>exec</goal>
+                            </goals>
+                        <configuration>
+                            <executable>mv</executable>
+                            <workingDirectory>${project.build.directory}/puppet</workingDirectory>
+                            <arguments>
+                                <argument>puppetlabs-inifile-${inifile_module_version}</argument>
+                                <argument>inifile</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.github</groupId>
+            <artifactId>inifile</artifactId>
+            <version>${inifile_module_version}</version>
+            <type>tar.gz</type>
+        </dependency>
+    </dependencies>
+</project>
